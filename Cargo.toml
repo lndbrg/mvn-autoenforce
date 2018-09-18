@@ -1,0 +1,14 @@
+[package]
+name = "mvn-autoenforce"
+version = "0.1.0"
+authors = ["Olle Lundberg <geek@nerd.sh>"]
+description = "Parses maven enforces output and gives you the topmost version of dependencies"
+repository = "https://github.com/lndbrg/mvn-autoenforce.git"
+homepage = "https://github.com/lndbrg/mvn-autoenforce"
+readme = "README.md"
+license = "MIT"
+
+[dependencies]
+regex = "1"
+version-compare = "0.0.5"
+itertools = "0.7.3"

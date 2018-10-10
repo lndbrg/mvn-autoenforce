@@ -68,9 +68,8 @@ fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Depende
     version_regex
         .captures_iter(output)
         .map(|v| Dependency {
-            group_id: dependency.group_id,
-            artifact_id: dependency.artifact_id,
             version: Version::from(v.get(1).unwrap().as_str()).unwrap(),
+            ..dependency
         }).max_by(Ord::cmp)
 }
 

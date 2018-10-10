@@ -1,6 +1,6 @@
 [package]
 name = "mvn-autoenforce"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Olle Lundberg <geek@nerd.sh>"]
 description = "Parses maven enforces output and gives you the topmost version of dependencies"
 repository = "https://github.com/lndbrg/mvn-autoenforce.git"

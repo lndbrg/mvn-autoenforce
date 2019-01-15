@@ -62,7 +62,7 @@ impl<'a> Display for Dependency<'a> {
 
 fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Dependency<'a>> {
     let version_regex =
-        Regex::new(format!("{}:{}:(\\S+)", dependency.group_id, dependency.artifact_id).as_ref())
+        Regex::new(format!("\\S{}:{}:(\\S+)", dependency.group_id, dependency.artifact_id).as_ref())
             .unwrap();
 
     version_regex

@@ -2,15 +2,18 @@ extern crate itertools;
 extern crate regex;
 extern crate version_compare;
 
-use itertools::Itertools;
-use regex::Regex;
 use std::cmp::Ordering;
+use std::env;
 use std::fmt::Display;
 use std::fmt::Error;
 use std::fmt::Formatter;
 use std::io;
 use std::io::Read;
+
+use itertools::Itertools;
+use regex::Regex;
 use version_compare::Version;
+use version_compare::VersionPart;
 
 struct Dependency<'a> {
     group_id: &'a str,
@@ -68,7 +71,7 @@ fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Depende
     version_regex
         .captures_iter(output)
         .map(|v| Dependency {
-            version: Version::from(v.get(1).unwrap().as_str()).unwrap(),
+            version: create_version(v.get(1).unwrap().as_str()),
             ..dependency
         }).max_by(Ord::cmp)
 }
@@ -78,11 +81,44 @@ fn parse_dependency(dependency: &str) -> Dependency {
     Dependency {
         group_id: coordinates[0],
         artifact_id: coordinates[1],
-        version: Version::from(coordinates[2]).unwrap(),
+        version: create_version(coordinates[2]),
     }
 }
 
+fn create_version(version_string: &str) -> Version {
+    let initial_version = Version::from(version_string)
+        .expect(format!("Unparseable version '{}'", version_string).as_str());
+    Version::from_parts(version_string,
+                        initial_version.parts()
+                            .iter()
+                            .map(explode_part)
+                            .flatten()
+                            .collect_vec())
+}
+
+fn explode_part<'a>(version_part: &VersionPart<'a>) -> Vec<VersionPart<'a>> {
+    match version_part {
+        VersionPart::Number(val) => { vec![VersionPart::Number(*val)] }
+        VersionPart::Text(val) => {
+            let split: Vec<&str> = val.split("-").collect();
+            split.iter().map(|part| match part.parse::<i32>() {
+                Ok(number) => { VersionPart::Number(number) }
+                Err(_) => { VersionPart::Text(part) }
+            }).collect_vec()
+        }
+    }
+}
+
+
 fn main() -> io::Result<()> {
+    if env::args()
+        .find(|arg| arg.eq(&String::from("-v")) || arg.eq(&String::from("--version")))
+        .is_some() {
+        const NAME: &'static str = env!("CARGO_PKG_NAME");
+        const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+        return Ok(println!("{} {}", NAME, VERSION));
+    }
+
     let mut buffer = String::new();
     let stdin = io::stdin();
     let mut handle = stdin.lock();

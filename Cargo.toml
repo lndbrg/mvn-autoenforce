@@ -7,8 +7,9 @@ repository = "https://github.com/lndbrg/mvn-autoenforce.git"
 homepage = "https://github.com/lndbrg/mvn-autoenforce"
 readme = "README.md"
 license = "MIT"
+edition = "2018"
 
 [dependencies]
 regex = "1"
-version-compare = "0.0.5"
-itertools = "0.7.3"
+version-compare = { git = "https://github.com/lndbrg/version-compare", branch = "from-parts" }
+itertools = "0.8.0"

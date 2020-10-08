@@ -1,0 +1,37 @@
+INFO] Scanning for projects...
+...
+[INFO] --- maven-enforcer-plugin:3.0.0-M2:enforce (display-info) @ groovy-postbuild ---
+[INFO] Adding ignore: module-info
+[WARNING] Rule 4: org.apache.maven.plugins.enforcer.RequireUpperBoundDeps failed with message:
+Failed while enforcing RequireUpperBoundDeps. The error(s) are [
+Require upper bound dependencies error for org.jenkins-ci.plugins.workflow:workflow-api:2.27 paths to dependency are:
++-org.jvnet.hudson.plugins:groovy-postbuild:2.5-SNAPSHOT
+  +-org.jenkins-ci.plugins.workflow:workflow-cps:2.54
+    +-org.jenkins-ci.plugins.workflow:workflow-api:2.27
+and
++-org.jvnet.hudson.plugins:groovy-postbuild:2.5-SNAPSHOT
+  +-org.jenkins-ci.plugins.workflow:workflow-job:2.32
+    +-org.jenkins-ci.plugins.workflow:workflow-api:2.32
+and
++-org.jvnet.hudson.plugins:groovy-postbuild:2.5-SNAPSHOT
+  +-org.jenkins-ci.plugins.workflow:workflow-basic-steps:2.4
+    +-org.jenkins-ci.plugins.workflow:workflow-api:2.8
+and
++-org.jvnet.hudson.plugins:groovy-postbuild:2.5-SNAPSHOT
+  +-org.jenkins-ci.plugins.workflow:workflow-cps:2.54
+    +-org.jenkins-ci.plugins.workflow:workflow-support:2.17
+      +-org.jenkins-ci.plugins.workflow:workflow-api:2.25
+]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.279 s
+[INFO] Finished at: 2019-06-16T02:34:04Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-enforcer-plugin:3.0.0-M2:enforce (display-info) on project groovy-postbuild: Some Enforcer rules have failed. Look above for specific messages explaining why the rule failed. -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

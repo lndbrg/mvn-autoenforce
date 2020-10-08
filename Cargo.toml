@@ -11,5 +11,5 @@ edition = "2018"
 
 [dependencies]
 regex = "1"
-version-compare = { git = "https://github.com/lndbrg/version-compare", branch = "from-parts" }
+version-compare = "0.0.11"
 itertools = "0.8.0"

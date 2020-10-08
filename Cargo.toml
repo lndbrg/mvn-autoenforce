@@ -9,6 +9,10 @@ readme = "README.md"
 license = "MIT"
 edition = "2018"
 
+[profile.release]
+opt-level = 3
+lto = "fat"
+
 [dependencies]
 regex = "1"
 version-compare = "0.0.11"

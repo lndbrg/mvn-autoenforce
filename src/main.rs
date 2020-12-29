@@ -67,16 +67,22 @@ impl<'a> Display for Dependency<'a> {
 }
 
 fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Dependency<'a>> {
-    let version_regex =
-        Regex::new(format!("\\S{}:{}:(\\S+)", dependency.group_id, dependency.artifact_id).as_ref())
-            .unwrap();
+    let version_regex = Regex::new(
+        format!(
+            "\\S{}:{}:(\\S+)",
+            dependency.group_id, dependency.artifact_id
+        )
+        .as_ref(),
+    )
+    .unwrap();
 
     version_regex
         .captures_iter(output)
         .map(|v| Dependency {
             version: create_version(v.get(1).unwrap().as_str()),
             ..dependency
-        }).max_by(Ord::cmp)
+        })
+        .max_by(Ord::cmp)
 }
 
 fn parse_dependency(dependency: &str) -> Dependency {
@@ -91,31 +97,39 @@ fn parse_dependency(dependency: &str) -> Dependency {
 fn create_version(version_string: &str) -> Version {
     let initial_version = Version::from(version_string)
         .expect(format!("Unparseable version '{}'", version_string).as_str());
-    Version::from_parts(version_string,
-                        initial_version.parts()
-                            .iter()
-                            .map(explode_part)
-                            .flatten()
-                            .collect())
+    Version::from_parts(
+        version_string,
+        initial_version
+            .parts()
+            .iter()
+            .map(explode_part)
+            .flatten()
+            .collect(),
+    )
 }
 
 fn explode_part<'a>(version_part: &VersionPart<'a>) -> Vec<VersionPart<'a>> {
     match version_part {
-        VersionPart::Number(val) => { vec![VersionPart::Number(*val)] }
+        VersionPart::Number(val) => {
+            vec![VersionPart::Number(*val)]
+        }
         VersionPart::Text(val) => {
             let split: Vec<&str> = val.split("-").collect();
-            split.iter().map(|part| match part.parse::<i32>() {
-                Ok(number) => { VersionPart::Number(number) }
-                Err(_) => { VersionPart::Text(part) }
-            }).collect()
+            split
+                .iter()
+                .map(|part| match part.parse::<i32>() {
+                    Ok(number) => VersionPart::Number(number),
+                    Err(_) => VersionPart::Text(part),
+                })
+                .collect()
         }
     }
 }
 
 fn parse(input: &str) -> Vec<Dependency> {
-    let upper_bounds = Regex::new(
-        "Require upper bound dependencies error for (.*) paths to dependency are:",
-    ).unwrap();
+    let upper_bounds =
+        Regex::new("Require upper bound dependencies error for (.*) paths to dependency are:")
+            .unwrap();
 
     upper_bounds
         .captures_iter(input)
@@ -128,14 +142,17 @@ fn parse(input: &str) -> Vec<Dependency> {
 fn main() -> io::Result<()> {
     if env::args()
         .find(|arg| arg.eq(&String::from("-v")) || arg.eq(&String::from("--version")))
-        .is_some() {
+        .is_some()
+    {
         const NAME: &'static str = env!("CARGO_PKG_NAME");
         const VERSION: &'static str = env!("CARGO_PKG_VERSION");
         return Ok(println!("{} {}", NAME, VERSION));
     }
 
     if atty::is(Stream::Stdin) {
-        return Ok(eprintln!("Stdin is a terminal, you should pipe the output of mvn validate to this program"));
+        return Ok(eprintln!(
+            "Stdin is a terminal, you should pipe the output of mvn validate to this program"
+        ));
     }
 
     let stdin = io::stdin();
@@ -144,7 +161,9 @@ fn main() -> io::Result<()> {
 
     match handle.read_to_string(&mut buffer) {
         Err(err) => panic!("Failed to read from stdin {}", err),
-        Ok(_) => parse(buffer.as_str()).iter().for_each(|dep| println!("{}", dep))
+        Ok(_) => parse(buffer.as_str())
+            .iter()
+            .for_each(|dep| println!("{}", dep)),
     }
     Ok(())
 }
@@ -157,11 +176,14 @@ mod tests {
     fn parse_should_return_vec_of_deps_on_validate_failed_input() {
         let failed = include_str!("../test/fixtures/fail.out");
         let deps = parse(failed);
-        assert_eq!(deps, vec![Dependency {
-            group_id: "org.jenkins-ci.plugins.workflow",
-            artifact_id: "workflow-api",
-            version: Version::from("2.32").unwrap(),
-        }])
+        assert_eq!(
+            deps,
+            vec![Dependency {
+                group_id: "org.jenkins-ci.plugins.workflow",
+                artifact_id: "workflow-api",
+                version: Version::from("2.32").unwrap(),
+            }]
+        )
     }
 
     #[test]

@@ -16,5 +16,5 @@ lto = "fat"
 [dependencies]
 regex = "1"
 version-compare = "0.0.11"
-itertools = "0.8.0"
+itertools = "0.10.0"
 atty = "0.2"

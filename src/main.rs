@@ -93,7 +93,7 @@ fn create_version(version_string: &str) -> Version {
                             .iter()
                             .map(explode_part)
                             .flatten()
-                            .collect_vec())
+                            .collect())
 }
 
 fn explode_part<'a>(version_part: &VersionPart<'a>) -> Vec<VersionPart<'a>> {
@@ -104,7 +104,7 @@ fn explode_part<'a>(version_part: &VersionPart<'a>) -> Vec<VersionPart<'a>> {
             split.iter().map(|part| match part.parse::<i32>() {
                 Ok(number) => { VersionPart::Number(number) }
                 Err(_) => { VersionPart::Text(part) }
-            }).collect_vec()
+            }).collect()
         }
     }
 }
@@ -119,7 +119,7 @@ fn parse(input: &str) -> Vec<Dependency> {
         .map(|cap| parse_dependency(cap.get(1).unwrap().as_str()))
         .flat_map(|dep| max_by_dep(dep, input))
         .sorted_by(Ord::cmp)
-        .collect_vec()
+        .collect()
 }
 
 fn main() -> io::Result<()> {

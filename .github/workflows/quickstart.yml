@@ -1,4 +1,4 @@
-name: Rust Example
+name: Format, lint and test
 
 on: [push]
 

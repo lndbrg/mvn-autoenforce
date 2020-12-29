@@ -70,7 +70,7 @@ dependencies = [
 
 [[package]]
 name = "mvn-autoenforce"
-version = "0.1.5-alpha.0"
+version = "0.1.5"
 dependencies = [
  "atty",
  "itertools",

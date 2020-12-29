@@ -1,3 +1,4 @@
+extern crate atty;
 extern crate itertools;
 extern crate regex;
 extern crate version_compare;
@@ -10,6 +11,7 @@ use std::fmt::Formatter;
 use std::io;
 use std::io::Read;
 
+use atty::Stream;
 use itertools::Itertools;
 use regex::Regex;
 use version_compare::Version;
@@ -130,6 +132,10 @@ fn main() -> io::Result<()> {
         const NAME: &'static str = env!("CARGO_PKG_NAME");
         const VERSION: &'static str = env!("CARGO_PKG_VERSION");
         return Ok(println!("{} {}", NAME, VERSION));
+    }
+
+    if atty::is(Stream::Stdin) {
+        return Ok(eprintln!("Stdin is a terminal, you should pipe the output of mvn validate to this program"));
     }
 
     let stdin = io::stdin();

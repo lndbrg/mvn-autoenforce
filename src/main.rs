@@ -86,7 +86,7 @@ fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Depende
 }
 
 fn parse_dependency(dependency: &str) -> Dependency {
-    let coordinates: Vec<&str> = dependency.split(":").collect();
+    let coordinates: Vec<&str> = dependency.split(':').collect();
     Dependency {
         group_id: coordinates[0],
         artifact_id: coordinates[1],
@@ -96,7 +96,7 @@ fn parse_dependency(dependency: &str) -> Dependency {
 
 fn create_version(version_string: &str) -> Version {
     let initial_version = Version::from(version_string)
-        .expect(format!("Unparseable version '{}'", version_string).as_str());
+        .unwrap_or_else(|| panic!("Unparseable version '{}'", version_string));
     Version::from_parts(
         version_string,
         initial_version
@@ -114,7 +114,7 @@ fn explode_part<'a>(version_part: &VersionPart<'a>) -> Vec<VersionPart<'a>> {
             vec![VersionPart::Number(*val)]
         }
         VersionPart::Text(val) => {
-            let split: Vec<&str> = val.split("-").collect();
+            let split: Vec<&str> = val.split('-').collect();
             split
                 .iter()
                 .map(|part| match part.parse::<i32>() {
@@ -140,19 +140,18 @@ fn parse(input: &str) -> Vec<Dependency> {
 }
 
 fn main() -> io::Result<()> {
-    if env::args()
-        .find(|arg| arg.eq(&String::from("-v")) || arg.eq(&String::from("--version")))
-        .is_some()
-    {
-        const NAME: &'static str = env!("CARGO_PKG_NAME");
-        const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-        return Ok(println!("{} {}", NAME, VERSION));
+    if env::args().any(|arg| arg.eq(&String::from("-v")) || arg.eq(&String::from("--version"))) {
+        const NAME: &str = env!("CARGO_PKG_NAME");
+        const VERSION: &str = env!("CARGO_PKG_VERSION");
+        println!("{} {}", NAME, VERSION);
+        return Ok(());
     }
 
     if atty::is(Stream::Stdin) {
-        return Ok(eprintln!(
+        eprintln!(
             "Stdin is a terminal, you should pipe the output of mvn validate to this program"
-        ));
+        );
+        return Ok(());
     }
 
     let stdin = io::stdin();

@@ -15,6 +15,7 @@ use regex::Regex;
 use version_compare::Version;
 use version_compare::VersionPart;
 
+#[derive(Debug)]
 struct Dependency<'a> {
     group_id: &'a str,
     artifact_id: &'a str,
@@ -140,4 +141,27 @@ fn main() -> io::Result<()> {
         Ok(_) => parse(buffer.as_str()).iter().for_each(|dep| println!("{}", dep))
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_should_return_vec_of_deps_on_validate_failed_input() {
+        let failed = include_str!("../test/fixtures/fail.out");
+        let deps = parse(failed);
+        assert_eq!(deps, vec![Dependency {
+            group_id: "org.jenkins-ci.plugins.workflow",
+            artifact_id: "workflow-api",
+            version: Version::from("2.32").unwrap(),
+        }])
+    }
+
+    #[test]
+    fn parse_should_return_empty_vec_on_validate_successful_input() {
+        let success = include_str!("../test/fixtures/success.out");
+        let deps = parse(success);
+        assert_eq!(deps, vec![])
+    }
 }

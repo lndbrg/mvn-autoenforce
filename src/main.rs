@@ -109,6 +109,18 @@ fn explode_part<'a>(version_part: &VersionPart<'a>) -> Vec<VersionPart<'a>> {
     }
 }
 
+fn parse(input: &str) -> Vec<Dependency> {
+    let upper_bounds = Regex::new(
+        "Require upper bound dependencies error for (.*) paths to dependency are:",
+    ).unwrap();
+
+    upper_bounds
+        .captures_iter(input)
+        .map(|cap| parse_dependency(cap.get(1).unwrap().as_str()))
+        .flat_map(|dep| max_by_dep(dep, input))
+        .sorted_by(Ord::cmp)
+        .collect_vec()
+}
 
 fn main() -> io::Result<()> {
     if env::args()
@@ -119,26 +131,13 @@ fn main() -> io::Result<()> {
         return Ok(println!("{} {}", NAME, VERSION));
     }
 
-    let mut buffer = String::new();
     let stdin = io::stdin();
     let mut handle = stdin.lock();
+    let mut buffer = String::new();
 
     match handle.read_to_string(&mut buffer) {
         Err(err) => panic!("Failed to read from stdin {}", err),
-        Ok(_) => {
-            let upper_bounds = Regex::new(
-                "Require upper bound dependencies error for (.*) paths to dependency are:",
-            ).unwrap();
-
-            // TODO: more efficient parsing, using nom?
-            upper_bounds
-                .captures_iter(buffer.as_str())
-                .map(|cap| parse_dependency(cap.get(1).unwrap().as_str()))
-                .flat_map(|dep| max_by_dep(dep, buffer.as_str()))
-                .sorted_by(Ord::cmp)
-                .into_iter()
-                .for_each(|dep| println!("{}", dep));
-            Ok(())
-        }
+        Ok(_) => parse(buffer.as_str()).iter().for_each(|dep| println!("{}", dep))
     }
+    Ok(())
 }

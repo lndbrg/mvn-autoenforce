@@ -1,3 +1,4 @@
+extern crate atty;
 extern crate itertools;
 extern crate regex;
 extern crate version_compare;
@@ -10,11 +11,13 @@ use std::fmt::Formatter;
 use std::io;
 use std::io::Read;
 
+use atty::Stream;
 use itertools::Itertools;
 use regex::Regex;
 use version_compare::Version;
 use version_compare::VersionPart;
 
+#[derive(Debug)]
 struct Dependency<'a> {
     group_id: &'a str,
     artifact_id: &'a str,
@@ -93,7 +96,7 @@ fn create_version(version_string: &str) -> Version {
                             .iter()
                             .map(explode_part)
                             .flatten()
-                            .collect_vec())
+                            .collect())
 }
 
 fn explode_part<'a>(version_part: &VersionPart<'a>) -> Vec<VersionPart<'a>> {
@@ -104,11 +107,23 @@ fn explode_part<'a>(version_part: &VersionPart<'a>) -> Vec<VersionPart<'a>> {
             split.iter().map(|part| match part.parse::<i32>() {
                 Ok(number) => { VersionPart::Number(number) }
                 Err(_) => { VersionPart::Text(part) }
-            }).collect_vec()
+            }).collect()
         }
     }
 }
 
+fn parse(input: &str) -> Vec<Dependency> {
+    let upper_bounds = Regex::new(
+        "Require upper bound dependencies error for (.*) paths to dependency are:",
+    ).unwrap();
+
+    upper_bounds
+        .captures_iter(input)
+        .map(|cap| parse_dependency(cap.get(1).unwrap().as_str()))
+        .flat_map(|dep| max_by_dep(dep, input))
+        .sorted_by(Ord::cmp)
+        .collect()
+}
 
 fn main() -> io::Result<()> {
     if env::args()
@@ -119,26 +134,40 @@ fn main() -> io::Result<()> {
         return Ok(println!("{} {}", NAME, VERSION));
     }
 
-    let mut buffer = String::new();
+    if atty::is(Stream::Stdin) {
+        return Ok(eprintln!("Stdin is a terminal, you should pipe the output of mvn validate to this program"));
+    }
+
     let stdin = io::stdin();
     let mut handle = stdin.lock();
+    let mut buffer = String::new();
 
     match handle.read_to_string(&mut buffer) {
         Err(err) => panic!("Failed to read from stdin {}", err),
-        Ok(_) => {
-            let upper_bounds = Regex::new(
-                "Require upper bound dependencies error for (.*) paths to dependency are:",
-            ).unwrap();
+        Ok(_) => parse(buffer.as_str()).iter().for_each(|dep| println!("{}", dep))
+    }
+    Ok(())
+}
 
-            // TODO: more efficient parsing, using nom?
-            upper_bounds
-                .captures_iter(buffer.as_str())
-                .map(|cap| parse_dependency(cap.get(1).unwrap().as_str()))
-                .flat_map(|dep| max_by_dep(dep, buffer.as_str()))
-                .sorted_by(Ord::cmp)
-                .into_iter()
-                .for_each(|dep| println!("{}", dep));
-            Ok(())
-        }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_should_return_vec_of_deps_on_validate_failed_input() {
+        let failed = include_str!("../test/fixtures/fail.out");
+        let deps = parse(failed);
+        assert_eq!(deps, vec![Dependency {
+            group_id: "org.jenkins-ci.plugins.workflow",
+            artifact_id: "workflow-api",
+            version: Version::from("2.32").unwrap(),
+        }])
+    }
+
+    #[test]
+    fn parse_should_return_empty_vec_on_validate_successful_input() {
+        let success = include_str!("../test/fixtures/success.out");
+        let deps = parse(success);
+        assert_eq!(deps, vec![])
     }
 }

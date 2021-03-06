@@ -28,19 +28,19 @@ fn parse(input: &str) -> Vec<Dependency> {
         .collect()
 }
 
-fn main() -> io::Result<()> {
+fn main() {
     if env::args().any(|arg| arg.eq(&String::from("-v")) || arg.eq(&String::from("--version"))) {
         const NAME: &str = env!("CARGO_PKG_NAME");
         const VERSION: &str = env!("CARGO_PKG_VERSION");
         println!("{} {}", NAME, VERSION);
-        return Ok(());
+        return;
     }
 
     if atty::is(Stream::Stdin) {
         eprintln!(
             "Stdin is a terminal, you should pipe the output of mvn validate to this program"
         );
-        return Ok(());
+        return;
     }
 
     let stdin = io::stdin();
@@ -53,7 +53,6 @@ fn main() -> io::Result<()> {
             .iter()
             .for_each(|dep| println!("{}", dep)),
     }
-    Ok(())
 }
 
 #[cfg(test)]

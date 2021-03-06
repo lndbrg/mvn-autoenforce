@@ -1,5 +1,4 @@
 extern crate atty;
-extern crate itertools;
 extern crate regex;
 extern crate version_compare;
 
@@ -8,12 +7,13 @@ use std::io;
 use std::io::Read;
 
 use atty::Stream;
-use itertools::Itertools;
 use regex::Regex;
 
 use crate::dependency::{max_by_dep, parse_dependency, Dependency};
+use crate::iter::SortedByExt;
 
 mod dependency;
+mod iter;
 
 fn parse(input: &str) -> Vec<Dependency> {
     let upper_bounds =
@@ -58,8 +58,9 @@ fn main() -> io::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use version_compare::Version;
+
+    use super::*;
 
     #[test]
     fn parse_should_return_vec_of_deps_on_validate_failed_input() {

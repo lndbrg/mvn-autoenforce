@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     fn parse_should_return_vec_of_deps_on_validate_failed_input() {
-        let failed = include_str!("../test/fixtures/fail.out");
+        let failed = include_str!("../test/fixtures/fail-one-regular.out");
         let deps = parse(failed);
         assert_eq!(
             deps,
@@ -72,6 +72,51 @@ mod tests {
                 artifact_id: "workflow-api",
                 version: Version::from("2.32").unwrap(),
             }]
+        )
+    }
+
+    #[test]
+    fn parse_should_return_vec_of_deps_on_validate_failed_with_managed_input() {
+        let failed = include_str!("../test/fixtures/fail-managed.out");
+        let deps = parse(failed);
+        assert_eq!(
+            deps,
+            vec![Dependency {
+                group_id: "com.h2database",
+                artifact_id: "h2",
+                version: Version::from("1.4.190").unwrap(),
+            }]
+        )
+    }
+
+    #[test]
+    fn parse_should_return_vec_of_deps_on_validate_failed_with_multiple_bound_concflicts_input() {
+        let failed = include_str!("../test/fixtures/fail-multiple.out");
+        let deps = parse(failed);
+        assert_eq!(
+            deps,
+            vec![
+                Dependency {
+                    group_id: "org.codehaus.groovy",
+                    artifact_id: "groovy-all",
+                    version: Version::from("2.4.12").unwrap()
+                },
+                Dependency {
+                    group_id: "org.slf4j",
+                    artifact_id: "jcl-over-slf4j",
+                    version: Version::from("1.7.26").unwrap(),
+                },
+                Dependency {
+                    group_id: "org.slf4j",
+                    artifact_id: "log4j-over-slf4j",
+                    version: Version::from("1.7.26").unwrap(),
+                },
+                Dependency {
+                    group_id: "org.slf4j",
+                    artifact_id: "slf4j-jdk14",
+                    version: Version::from("1.7.26").unwrap(),
+                }
+            ]
         )
     }
 

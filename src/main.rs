@@ -76,6 +76,20 @@ mod tests {
     }
 
     #[test]
+    fn parse_should_return_vec_of_deps_on_validate_failed_with_managed_input() {
+        let failed = include_str!("../test/fixtures/fail-managed.out");
+        let deps = parse(failed);
+        assert_eq!(
+            deps,
+            vec![Dependency {
+                group_id: "com.h2database",
+                artifact_id: "h2",
+                version: Version::from("1.4.190").unwrap(),
+            }]
+        )
+    }
+
+    #[test]
     fn parse_should_return_empty_vec_on_validate_successful_input() {
         let success = include_str!("../test/fixtures/success.out");
         let deps = parse(success);

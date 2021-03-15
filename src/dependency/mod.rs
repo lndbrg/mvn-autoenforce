@@ -1,12 +1,13 @@
-mod version;
-
 use core::cmp::{Eq, Ord, Ordering};
 use core::fmt::{Display, Error, Formatter};
 use core::result::Result;
 
-use crate::dependency::version::create_version;
-use regex::Regex;
+use regex::{escape, Match, Regex};
 use version_compare::Version;
+
+use crate::dependency::version::create_version;
+
+mod version;
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct Dependency<'a> {
@@ -46,8 +47,9 @@ impl<'a> Display for Dependency<'a> {
 pub fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Dependency<'a>> {
     let version_regex = Regex::new(
         format!(
-            "\\S{}:{}:(\\S+)",
-            dependency.group_id, dependency.artifact_id
+            "{}:{}:(\\S+)",
+            escape(dependency.group_id),
+            escape(dependency.artifact_id)
         )
         .as_ref(),
     )
@@ -55,9 +57,25 @@ pub fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Dep
 
     version_regex
         .captures_iter(output)
-        .map(|v| Dependency {
-            version: create_version(v.get(1).unwrap().as_str()),
-            ..dependency
+        .flat_map(|captures| {
+            /*
+            Captures does not have an into_iter method so we get the wrong type of reference, we
+            take a roundtrip through a vec that can give us the correct type of reference and we
+            no longer need to worry about borrowed values.
+
+            We translate all captures found, but skip the first as that is the full match of the
+            regex, not just the capture group of versions we are looking for.
+            */
+            captures
+                .iter()
+                .skip(1)
+                .filter_map(|x| x)
+                .collect::<Vec<Match>>()
+                .into_iter()
+                .map(|m| Dependency {
+                    version: create_version(m.clone().as_str()),
+                    ..dependency
+                })
         })
         .max_by(Ord::cmp)
 }

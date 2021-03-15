@@ -1,0 +1,44 @@
+[WARNING] Rule 4: org.apache.maven.plugins.enforcer.RequireUpperBoundDeps failed with message:
+Failed while enforcing RequireUpperBoundDeps. The error(s) are [
+Require upper bound dependencies error for org.codehaus.groovy:groovy-all:2.4.11 paths to dependency are:
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.jenkins-ci.plugins:job-dsl:1.76
+    +-org.codehaus.groovy:groovy-all:2.4.11
+and
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.jenkins-ci.main:jenkins-core:2.223
+    +-org.codehaus.groovy:groovy-all:2.4.12
+and
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.jenkins-ci.plugins:job-dsl:1.76
+    +-org.jenkins-ci.plugins:job-dsl-core:1.76
+      +-org.codehaus.groovy:groovy-all:2.4.11
+and
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.jenkins-ci.main:jenkins-core:2.223
+    +-org.kohsuke.stapler:stapler-groovy:1.258
+      +-org.codehaus.groovy:groovy-all:2.4.11
+,
+Require upper bound dependencies error for org.slf4j:jcl-over-slf4j:1.7.25 paths to dependency are:
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.slf4j:jcl-over-slf4j:1.7.25
+and
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.jenkins-ci.main:jenkins-core:2.223
+    +-org.slf4j:jcl-over-slf4j:1.7.26
+,
+Require upper bound dependencies error for org.slf4j:log4j-over-slf4j:1.7.25 paths to dependency are:
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.slf4j:log4j-over-slf4j:1.7.25
+and
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.jenkins-ci.main:jenkins-core:2.223
+    +-org.slf4j:log4j-over-slf4j:1.7.26
+,
+Require upper bound dependencies error for org.slf4j:slf4j-jdk14:1.7.25 paths to dependency are:
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.slf4j:slf4j-jdk14:1.7.25
+and
++-io.jenkins.plugins:environment-dashboard:1.1.8-SNAPSHOT
+  +-org.jenkins-ci.main:jenkins-war:2.223
+    +-org.slf4j:slf4j-jdk14:1.7.26

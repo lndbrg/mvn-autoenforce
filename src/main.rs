@@ -1,6 +1,5 @@
 extern crate atty;
 extern crate regex;
-extern crate version_compare;
 
 use std::env;
 use std::io;
@@ -9,7 +8,7 @@ use std::io::Read;
 use atty::Stream;
 use regex::Regex;
 
-use crate::dependency::{max_by_dep, parse_dependency, Dependency};
+use crate::dependency::{max_by_dep, Dependency};
 use crate::iter::SortedByExt;
 
 mod dependency;
@@ -22,7 +21,7 @@ fn parse(input: &str) -> Vec<Dependency> {
 
     upper_bounds
         .captures_iter(input)
-        .map(|cap| parse_dependency(cap.get(1).unwrap().as_str()))
+        .map(|cap| Dependency::from(cap.get(1).unwrap().as_str()))
         .flat_map(|dep| max_by_dep(dep, input))
         .sorted_by(Ord::cmp)
         .collect()
@@ -57,8 +56,6 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use version_compare::Version;
-
     use super::*;
 
     #[test]
@@ -67,11 +64,9 @@ mod tests {
         let deps = parse(failed);
         assert_eq!(
             deps,
-            vec![Dependency {
-                group_id: "org.jenkins-ci.plugins.workflow",
-                artifact_id: "workflow-api",
-                version: Version::from("2.32").unwrap(),
-            }]
+            vec![Dependency::from(
+                "org.jenkins-ci.plugins.workflow:workflow-api:2.32"
+            )]
         )
     }
 
@@ -79,14 +74,7 @@ mod tests {
     fn parse_should_return_vec_of_deps_on_validate_failed_with_managed_input() {
         let failed = include_str!("../test/fixtures/fail-managed.out");
         let deps = parse(failed);
-        assert_eq!(
-            deps,
-            vec![Dependency {
-                group_id: "com.h2database",
-                artifact_id: "h2",
-                version: Version::from("1.4.190").unwrap(),
-            }]
-        )
+        assert_eq!(deps, vec![Dependency::from("com.h2database:h2:1.4.190"),])
     }
 
     #[test]
@@ -96,26 +84,10 @@ mod tests {
         assert_eq!(
             deps,
             vec![
-                Dependency {
-                    group_id: "org.codehaus.groovy",
-                    artifact_id: "groovy-all",
-                    version: Version::from("2.4.12").unwrap()
-                },
-                Dependency {
-                    group_id: "org.slf4j",
-                    artifact_id: "jcl-over-slf4j",
-                    version: Version::from("1.7.26").unwrap(),
-                },
-                Dependency {
-                    group_id: "org.slf4j",
-                    artifact_id: "log4j-over-slf4j",
-                    version: Version::from("1.7.26").unwrap(),
-                },
-                Dependency {
-                    group_id: "org.slf4j",
-                    artifact_id: "slf4j-jdk14",
-                    version: Version::from("1.7.26").unwrap(),
-                }
+                Dependency::from("org.codehaus.groovy:groovy-all:2.4.12"),
+                Dependency::from("org.slf4j:jcl-over-slf4j:1.7.26"),
+                Dependency::from("org.slf4j:log4j-over-slf4j:1.7.26"),
+                Dependency::from("org.slf4j:slf4j-jdk14:1.7.26")
             ]
         )
     }

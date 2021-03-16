@@ -11,9 +11,20 @@ mod version;
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct Dependency<'a> {
-    pub group_id: &'a str,
-    pub artifact_id: &'a str,
-    pub version: Version<'a>,
+    group_id: &'a str,
+    artifact_id: &'a str,
+    version: Version<'a>,
+}
+
+impl<'a> Dependency<'a> {
+    pub fn from(coordinates_str: &'a str) -> Dependency<'a> {
+        let coordinates: Vec<&str> = coordinates_str.split(':').collect();
+        Dependency {
+            group_id: coordinates[0],
+            artifact_id: coordinates[1],
+            version: create_version(coordinates[2]),
+        }
+    }
 }
 
 impl<'a> Eq for Dependency<'a> {}
@@ -80,11 +91,21 @@ pub fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Dep
         .max_by(Ord::cmp)
 }
 
-pub fn parse_dependency(dependency: &str) -> Dependency {
-    let coordinates: Vec<&str> = dependency.split(':').collect();
-    Dependency {
-        group_id: coordinates[0],
-        artifact_id: coordinates[1],
-        version: create_version(coordinates[2]),
+#[cfg(test)]
+mod tests {
+    use version_compare::Version;
+
+    use crate::dependency::Dependency;
+
+    #[test]
+    fn dependency_from_should_parse_dependency_correctly() {
+        assert_eq!(
+            Dependency::from("com.h2database:h2:1.4.190"),
+            Dependency {
+                group_id: "com.h2database",
+                artifact_id: "h2",
+                version: Version::from("1.4.190").unwrap(),
+            }
+        )
     }
 }

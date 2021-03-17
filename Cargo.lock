@@ -55,7 +55,7 @@ dependencies = [
 
 [[package]]
 name = "mvn-autoenforce"
-version = "0.1.10"
+version = "0.1.11-alpha.0"
 dependencies = [
  "atty",
  "regex",

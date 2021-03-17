@@ -1,0 +1,20 @@
+name: Format, lint and test
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v1
+      - name: "Compile and test"
+        uses: icepuma/rust-action@master
+        with:
+          args: cargo fmt -- --check && cargo clippy -- -Dwarnings && cargo test
+      - name: "UI Test"
+        uses: icepuma/rust-action@master
+        with:
+          entrypoint: /bin/bash
+          args: ./ui-test.sh

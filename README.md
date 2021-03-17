@@ -1,6 +1,6 @@
 # mvn-autoenforce
 
-## Motivtion
+## Motivation
 Managing dependencies is hard and transitive dependencies might leak into your project which might have unforeseen
 side effects during runtime (some would call them bugs, I call it adding some spiciness to your code). Most people 
 do want to avoid the added spiciness of the unknown side effects and for maven based java projects a good way to do that

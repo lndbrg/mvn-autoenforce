@@ -1,12 +1,10 @@
 extern crate alloc;
 
-use alloc::vec::Vec;
+use alloc::vec::{IntoIter, Vec};
 use std::cmp::Ordering;
 
-type VecIntoIter<T> = alloc::vec::IntoIter<T>;
-
 pub trait SortedByExt: Iterator {
-    fn sorted_by<F>(self, cmp: F) -> VecIntoIter<Self::Item>
+    fn sorted_by<F>(self, cmp: F) -> IntoIter<Self::Item>
     where
         Self: Sized,
         F: FnMut(&Self::Item, &Self::Item) -> Ordering,
@@ -24,4 +22,4 @@ pub trait SortedByExt: Iterator {
     }
 }
 
-impl<I: Iterator> SortedByExt for I {}
+impl<T: ?Sized> SortedByExt for T where T: Iterator {}

@@ -80,7 +80,7 @@ pub fn max_by_dep<'a>(dependency: Dependency<'a>, output: &'a str) -> Option<Dep
             captures
                 .iter()
                 .skip(1)
-                .filter_map(|x| x)
+                .flatten()
                 .collect::<Vec<Match>>()
                 .into_iter()
                 .map(|m| Dependency {

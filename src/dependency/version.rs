@@ -10,8 +10,7 @@ pub fn create_version(version_string: &str) -> Version {
         initial_version
             .parts()
             .iter()
-            .map(explode_part)
-            .flatten()
+            .flat_map(explode_part)
             .collect(),
     )
 }

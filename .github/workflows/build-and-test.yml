@@ -12,7 +12,8 @@ jobs:
       - name: "Compile and test"
         uses: icepuma/rust-action@master
         with:
-          args: cargo fmt -- --check && cargo clippy -- -Dwarnings && cargo test
+          entrypoint: /bin/bash
+          args: ./build-and-test.sh
       - name: "UI Test"
         uses: icepuma/rust-action@master
         with:

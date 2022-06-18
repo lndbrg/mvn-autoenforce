@@ -1,13 +1,13 @@
 [package]
 name = "mvn-autoenforce"
 version = "0.1.11"
-authors = ["Olle Lundberg <geek@nerd.sh>"]
+authors = ["Olle Lundberg <hey@olle.lu>"]
 description = "Parses maven enforcer output and gives you the topmost version of dependencies"
 repository = "https://github.com/lndbrg/mvn-autoenforce.git"
 homepage = "https://github.com/lndbrg/mvn-autoenforce"
 readme = "README.md"
 license = "MIT"
-edition = "2018"
+edition = "2021"
 
 [profile.release]
 opt-level = 3

@@ -1,3 +1,4 @@
+Failed to parse version for coordinates 'com.h2database:h2': Failed to parse version from: 'BROKEN'
 
     <dependency>
         <groupId>com.h2database</groupId>

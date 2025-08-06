@@ -4,7 +4,7 @@ use core::result::Result;
 use std::convert::TryFrom;
 use std::iter;
 
-use regex::{escape, Match, Regex};
+use regex::{Match, Regex, escape};
 
 use crate::DependencyParseError;
 use crate::DependencyParseError::{CoordinateError, VersionError};
@@ -121,10 +121,10 @@ pub fn max_by_dep<'a>(
 mod tests {
     use std::convert::TryFrom;
 
+    use crate::dependency::Dependency;
     use crate::dependency::errors::DependencyParseError::{CoordinateError, VersionError};
     use crate::dependency::errors::UnparseableVersionError;
     use crate::dependency::version::Version;
-    use crate::dependency::Dependency;
 
     #[test]
     fn dependency_from_should_parse_dependency_correctly() {

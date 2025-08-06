@@ -3,8 +3,8 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::ops::Deref;
 
-use version_compare::version::Version as InnerVersion;
-use version_compare::version_part::VersionPart;
+use version_compare::Part as VersionPart;
+use version_compare::Version as InnerVersion;
 
 use crate::dependency::errors::UnparseableVersionError;
 

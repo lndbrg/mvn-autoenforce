@@ -7,7 +7,7 @@ repository = "https://github.com/lndbrg/mvn-autoenforce.git"
 homepage = "https://github.com/lndbrg/mvn-autoenforce"
 readme = "README.md"
 license = "MIT"
-edition = "2021"
+edition = "2024"
 
 [profile.release]
 opt-level = 3
@@ -15,4 +15,4 @@ lto = "fat"
 
 [dependencies]
 regex = "1"
-version-compare = "0.0.11"
+version-compare = "0.2.0"

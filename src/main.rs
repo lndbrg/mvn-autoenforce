@@ -9,7 +9,7 @@ use std::io::Read;
 use regex::Regex;
 
 use crate::dependency::errors::DependencyParseError;
-use crate::dependency::{max_by_dep, Dependency};
+use crate::dependency::{Dependency, max_by_dep};
 use crate::iter::SortedByExt;
 
 mod dependency;

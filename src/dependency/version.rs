@@ -18,13 +18,18 @@ defined regexes as guards. These guards should make sure we never even call try_
 output from maven that matches a coordinate string. If someone for some reason has managed to create
 an alphabetical version and gotten it uploaded somewhere we will fail to parse it.
 */
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq)]
 pub struct Version<'a> {
     inner: InnerVersion<'a>,
 }
 
 impl<'a> Eq for Version<'a> {}
 
+impl<'a> PartialOrd for Version<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
 impl<'a> Ord for Version<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.inner.partial_cmp(&other.inner).unwrap()

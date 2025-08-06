@@ -14,7 +14,7 @@ use crate::dependency::version::Version;
 pub(crate) mod errors;
 mod version;
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq)]
 pub struct Dependency<'a> {
     group_id: &'a str,
     artifact_id: &'a str,
@@ -23,6 +23,11 @@ pub struct Dependency<'a> {
 
 impl<'a> Eq for Dependency<'a> {}
 
+impl<'a> PartialOrd for Dependency<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
 impl<'a> Ord for Dependency<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.group_id

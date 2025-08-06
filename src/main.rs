@@ -42,7 +42,7 @@ fn main() {
     if env::args().any(|arg| arg.eq(&String::from("-v")) || arg.eq(&String::from("--version"))) {
         const NAME: &str = env!("CARGO_PKG_NAME");
         const VERSION: &str = env!("CARGO_PKG_VERSION");
-        println!("{} {}", NAME, VERSION);
+        println!("{NAME} {VERSION}");
         return;
     }
 
@@ -57,10 +57,10 @@ fn main() {
     let mut buffer = String::new();
 
     match stdin.lock().read_to_string(&mut buffer) {
-        Err(err) => eprintln!("Failed to read from stdin {}", err),
+        Err(err) => eprintln!("Failed to read from stdin {err}"),
         Ok(_) => match parse(buffer.as_str()) {
-            Err(e) => eprintln!("{}", e),
-            Ok(deps) => deps.iter().for_each(|dep| println!("{}", dep)),
+            Err(e) => eprintln!("{e}"),
+            Ok(deps) => deps.iter().for_each(|dep| println!("{dep}")),
         },
     }
 }

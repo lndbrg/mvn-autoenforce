@@ -40,17 +40,12 @@ impl Display for DependencyParseError<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DependencyParseError::CoordinateError(coords) => {
-                write!(
-                    f,
-                    "Failed to parse dependency coordinates from: '{}'",
-                    coords
-                )
+                write!(f, "Failed to parse dependency coordinates from: '{coords}'")
             }
             DependencyParseError::VersionError(group_id, artifact_id, version_error) => {
                 write!(
                     f,
-                    "Failed to parse version for coordinates '{}:{}': {}",
-                    group_id, artifact_id, version_error
+                    "Failed to parse version for coordinates '{group_id}:{artifact_id}': {version_error}"
                 )
             }
         }

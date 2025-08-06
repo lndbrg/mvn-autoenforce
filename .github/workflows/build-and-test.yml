@@ -1,21 +1,17 @@
 name: Format, lint and test
 
-on: [push]
+on: [ push ]
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Checkout"
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: "Compile and test"
-        uses: icepuma/rust-action@master
-        with:
-          entrypoint: /bin/bash
-          args: ./build-and-test.sh
+        run: ./build-and-test.sh
       - name: "UI Test"
-        uses: icepuma/rust-action@master
-        with:
-          entrypoint: /bin/bash
-          args: ./ui-test.sh
+        run: ./ui-test.sh

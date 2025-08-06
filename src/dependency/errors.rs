@@ -3,21 +3,22 @@ use std::fmt;
 use std::fmt::Display;
 
 #[derive(Debug, PartialEq)]
-pub struct UnparseableVersionError {
-    version_string: String,
+pub struct UnparseableVersionError<'a> {
+    version_string: &'a str,
 }
 
-impl Error for UnparseableVersionError {}
+impl Error for UnparseableVersionError<'_> {}
 
-impl From<&str> for UnparseableVersionError {
-    fn from(version_string: &str) -> Self {
-        Self {
-            version_string: version_string.to_string(),
-        }
+impl<'a, 'b> From<&'a str> for UnparseableVersionError<'b>
+where
+    'a: 'b,
+{
+    fn from(version_string: &'a str) -> UnparseableVersionError<'b> {
+        Self { version_string }
     }
 }
 
-impl Display for UnparseableVersionError {
+impl Display for UnparseableVersionError<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -28,14 +29,14 @@ impl Display for UnparseableVersionError {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum DependencyParseError {
-    CoordinateError(String),
-    VersionError(String, String, UnparseableVersionError),
+pub enum DependencyParseError<'a> {
+    CoordinateError(&'a str),
+    VersionError(&'a str, &'a str, UnparseableVersionError<'a>),
 }
 
-impl Error for DependencyParseError {}
+impl Error for DependencyParseError<'_> {}
 
-impl Display for DependencyParseError {
+impl Display for DependencyParseError<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DependencyParseError::CoordinateError(coords) => {

@@ -33,7 +33,7 @@ impl<'a> Ord for Dependency<'a> {
 }
 
 impl<'a> TryFrom<&'a str> for Dependency<'a> {
-    type Error = DependencyParseError;
+    type Error = DependencyParseError<'a>;
 
     fn try_from(coordinate_string: &'a str) -> Result<Self, Self::Error> {
         let coordinates: Vec<&str> = coordinate_string.split(':').collect();
@@ -45,9 +45,9 @@ impl<'a> TryFrom<&'a str> for Dependency<'a> {
                         artifact_id,
                         version,
                     })
-                    .map_err(|e| VersionError(group_id.to_owned(), artifact_id.to_owned(), e))
+                    .map_err(|e| VersionError(group_id, artifact_id, e))
             }
-            _ => Err(CoordinateError(coordinate_string.to_owned())),
+            _ => Err(CoordinateError(coordinate_string)),
         }
     }
 }
@@ -72,7 +72,7 @@ impl<'a> Display for Dependency<'a> {
 pub fn max_by_dep<'a>(
     dependency: Dependency<'a>,
     input: &'a str,
-) -> Result<Dependency<'a>, DependencyParseError> {
+) -> Result<Dependency<'a>, DependencyParseError<'a>> {
     let version_regex = Regex::new(
         format!(
             "{}:{}:(\\S+)",
@@ -95,11 +95,7 @@ pub fn max_by_dep<'a>(
         .collect();
 
     match versions {
-        Err(e) => Err(VersionError(
-            dependency.group_id.to_string(),
-            dependency.artifact_id.to_string(),
-            e,
-        )),
+        Err(e) => Err(VersionError(dependency.group_id, dependency.artifact_id, e)),
         /*
         Chain original version on to the potentially matched version, that way we know that
         the iterator is not the empty iterator, hence we can safely call unwrap on it since max_by
@@ -141,7 +137,7 @@ mod tests {
     fn dependency_from_with_missing_parts_should_result_in_coordinate_error() {
         assert_eq!(
             Dependency::try_from("com.h2database:h2"),
-            Err(CoordinateError("com.h2database:h2".to_string()))
+            Err(CoordinateError("com.h2database:h2"))
         )
     }
 
@@ -149,11 +145,11 @@ mod tests {
     fn dependency_from_with_missing_version_should_result_in_coordinate_error() {
         assert_eq!(
             Dependency::try_from("com.h2database:h2:"),
-            Err(CoordinateError("com.h2database:h2:".to_string()))
+            Err(CoordinateError("com.h2database:h2:"))
         );
         assert_eq!(
             Dependency::try_from("com.h2database:h2: "),
-            Err(CoordinateError("com.h2database:h2: ".to_string()))
+            Err(CoordinateError("com.h2database:h2: "))
         )
     }
 
@@ -162,8 +158,8 @@ mod tests {
         assert_eq!(
             Dependency::try_from("com.h2database:h2:broken"),
             Err(VersionError(
-                "com.h2database".to_string(),
-                "h2".to_string(),
+                "com.h2database",
+                "h2",
                 UnparseableVersionError::from("broken"),
             ))
         )

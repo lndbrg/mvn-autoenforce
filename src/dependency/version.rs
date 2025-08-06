@@ -40,7 +40,7 @@ impl<'a> Deref for Version<'a> {
 }
 
 impl<'a> TryFrom<&'a str> for Version<'a> {
-    type Error = UnparseableVersionError;
+    type Error = UnparseableVersionError<'a>;
 
     fn try_from(version_string: &'a str) -> Result<Self, Self::Error> {
         let initial_version = InnerVersion::from(version_string)

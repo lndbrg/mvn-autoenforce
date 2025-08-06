@@ -16,4 +16,3 @@ lto = "fat"
 [dependencies]
 regex = "1"
 version-compare = "0.0.11"
-atty = "0.2"

@@ -1,12 +1,11 @@
-extern crate atty;
 extern crate regex;
 
 use std::convert::TryFrom;
 use std::env;
 use std::io;
+use std::io::IsTerminal;
 use std::io::Read;
 
-use atty::Stream;
 use regex::Regex;
 
 use crate::dependency::errors::DependencyParseError;
@@ -47,7 +46,8 @@ fn main() {
         return;
     }
 
-    if atty::is(Stream::Stdin) {
+    let stdin = io::stdin();
+    if stdin.is_terminal() {
         eprintln!(
             "Stdin is a terminal, you should pipe the output of mvn validate to this program"
         );
@@ -56,7 +56,7 @@ fn main() {
 
     let mut buffer = String::new();
 
-    match io::stdin().lock().read_to_string(&mut buffer) {
+    match stdin.lock().read_to_string(&mut buffer) {
         Err(err) => eprintln!("Failed to read from stdin {}", err),
         Ok(_) => match parse(buffer.as_str()) {
             Err(e) => eprintln!("{}", e),

@@ -102,7 +102,7 @@ pub fn max_by_dep<'a>(
         is guaranteed to return at least one result.
         */
         Ok(v) => Ok(iter::once(dependency.version)
-            .chain(v.into_iter())
+            .chain(v)
             .max_by(Ord::cmp)
             .map(|version| Dependency {
                 version,

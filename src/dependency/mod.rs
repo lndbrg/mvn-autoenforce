@@ -61,12 +61,12 @@ impl<'a> Display for Dependency<'a> {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(
             f,
-            r#"
-    <dependency>
-        <groupId>{}</groupId>
-        <artifactId>{}</artifactId>
-        <version>{}</version>
-    </dependency>"#,
+            "\
+<dependency>
+    <groupId>{}</groupId>
+    <artifactId>{}</artifactId>
+    <version>{}</version>
+</dependency>",
             self.group_id,
             self.artifact_id,
             self.version.as_str()

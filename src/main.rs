@@ -55,7 +55,6 @@ fn main() {
     }
 
     let mut buffer = String::new();
-
     match stdin.lock().read_to_string(&mut buffer) {
         Err(err) => eprintln!("Failed to read from stdin {err}"),
         Ok(_) => match parse(buffer.as_str()) {

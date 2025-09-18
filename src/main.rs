@@ -1,22 +1,21 @@
-extern crate atty;
 extern crate regex;
 
 use std::convert::TryFrom;
 use std::env;
 use std::io;
+use std::io::IsTerminal;
 use std::io::Read;
 
-use atty::Stream;
 use regex::Regex;
 
 use crate::dependency::errors::DependencyParseError;
-use crate::dependency::{max_by_dep, Dependency};
+use crate::dependency::{Dependency, max_by_dep};
 use crate::iter::SortedByExt;
 
 mod dependency;
 mod iter;
 
-fn parse(input: &str) -> Result<Vec<Dependency>, DependencyParseError> {
+fn parse<'a>(input: &'a str) -> Result<Vec<Dependency<'a>>, DependencyParseError<'a>> {
     let upper_bounds =
         Regex::new("Require upper bound dependencies error for (\\S+) paths to dependency are:")
             .unwrap();
@@ -43,11 +42,12 @@ fn main() {
     if env::args().any(|arg| arg.eq(&String::from("-v")) || arg.eq(&String::from("--version"))) {
         const NAME: &str = env!("CARGO_PKG_NAME");
         const VERSION: &str = env!("CARGO_PKG_VERSION");
-        println!("{} {}", NAME, VERSION);
+        println!("{NAME} {VERSION}");
         return;
     }
 
-    if atty::is(Stream::Stdin) {
+    let stdin = io::stdin();
+    if stdin.is_terminal() {
         eprintln!(
             "Stdin is a terminal, you should pipe the output of mvn validate to this program"
         );
@@ -55,12 +55,11 @@ fn main() {
     }
 
     let mut buffer = String::new();
-
-    match io::stdin().lock().read_to_string(&mut buffer) {
-        Err(err) => eprintln!("Failed to read from stdin {}", err),
+    match stdin.lock().read_to_string(&mut buffer) {
+        Err(err) => eprintln!("Failed to read from stdin {err}"),
         Ok(_) => match parse(buffer.as_str()) {
-            Err(e) => eprintln!("{}", e),
-            Ok(deps) => deps.iter().for_each(|dep| println!("{}", dep)),
+            Err(e) => eprintln!("{e}"),
+            Ok(deps) => deps.iter().for_each(|dep| println!("{dep}")),
         },
     }
 }

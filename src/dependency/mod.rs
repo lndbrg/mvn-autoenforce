@@ -4,7 +4,7 @@ use core::result::Result;
 use std::convert::TryFrom;
 use std::iter;
 
-use regex::{escape, Match, Regex};
+use regex::{Match, Regex, escape};
 
 use crate::DependencyParseError;
 use crate::DependencyParseError::{CoordinateError, VersionError};
@@ -14,7 +14,7 @@ use crate::dependency::version::Version;
 pub(crate) mod errors;
 mod version;
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq)]
 pub struct Dependency<'a> {
     group_id: &'a str,
     artifact_id: &'a str,
@@ -23,6 +23,11 @@ pub struct Dependency<'a> {
 
 impl<'a> Eq for Dependency<'a> {}
 
+impl<'a> PartialOrd for Dependency<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
 impl<'a> Ord for Dependency<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.group_id
@@ -33,7 +38,7 @@ impl<'a> Ord for Dependency<'a> {
 }
 
 impl<'a> TryFrom<&'a str> for Dependency<'a> {
-    type Error = DependencyParseError;
+    type Error = DependencyParseError<'a>;
 
     fn try_from(coordinate_string: &'a str) -> Result<Self, Self::Error> {
         let coordinates: Vec<&str> = coordinate_string.split(':').collect();
@@ -45,9 +50,9 @@ impl<'a> TryFrom<&'a str> for Dependency<'a> {
                         artifact_id,
                         version,
                     })
-                    .map_err(|e| VersionError(group_id.to_owned(), artifact_id.to_owned(), e))
+                    .map_err(|e| VersionError(group_id, artifact_id, e))
             }
-            _ => Err(CoordinateError(coordinate_string.to_owned())),
+            _ => Err(CoordinateError(coordinate_string)),
         }
     }
 }
@@ -56,12 +61,12 @@ impl<'a> Display for Dependency<'a> {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(
             f,
-            r#"
-    <dependency>
-        <groupId>{}</groupId>
-        <artifactId>{}</artifactId>
-        <version>{}</version>
-    </dependency>"#,
+            "\
+<dependency>
+    <groupId>{}</groupId>
+    <artifactId>{}</artifactId>
+    <version>{}</version>
+</dependency>",
             self.group_id,
             self.artifact_id,
             self.version.as_str()
@@ -72,7 +77,7 @@ impl<'a> Display for Dependency<'a> {
 pub fn max_by_dep<'a>(
     dependency: Dependency<'a>,
     input: &'a str,
-) -> Result<Dependency<'a>, DependencyParseError> {
+) -> Result<Dependency<'a>, DependencyParseError<'a>> {
     let version_regex = Regex::new(
         format!(
             "{}:{}:(\\S+)",
@@ -95,18 +100,14 @@ pub fn max_by_dep<'a>(
         .collect();
 
     match versions {
-        Err(e) => Err(VersionError(
-            dependency.group_id.to_string(),
-            dependency.artifact_id.to_string(),
-            e,
-        )),
+        Err(e) => Err(VersionError(dependency.group_id, dependency.artifact_id, e)),
         /*
         Chain original version on to the potentially matched version, that way we know that
         the iterator is not the empty iterator, hence we can safely call unwrap on it since max_by
         is guaranteed to return at least one result.
         */
         Ok(v) => Ok(iter::once(dependency.version)
-            .chain(v.into_iter())
+            .chain(v)
             .max_by(Ord::cmp)
             .map(|version| Dependency {
                 version,
@@ -120,10 +121,10 @@ pub fn max_by_dep<'a>(
 mod tests {
     use std::convert::TryFrom;
 
+    use crate::dependency::Dependency;
     use crate::dependency::errors::DependencyParseError::{CoordinateError, VersionError};
     use crate::dependency::errors::UnparseableVersionError;
     use crate::dependency::version::Version;
-    use crate::dependency::Dependency;
 
     #[test]
     fn dependency_from_should_parse_dependency_correctly() {
@@ -141,7 +142,7 @@ mod tests {
     fn dependency_from_with_missing_parts_should_result_in_coordinate_error() {
         assert_eq!(
             Dependency::try_from("com.h2database:h2"),
-            Err(CoordinateError("com.h2database:h2".to_string()))
+            Err(CoordinateError("com.h2database:h2"))
         )
     }
 
@@ -149,11 +150,11 @@ mod tests {
     fn dependency_from_with_missing_version_should_result_in_coordinate_error() {
         assert_eq!(
             Dependency::try_from("com.h2database:h2:"),
-            Err(CoordinateError("com.h2database:h2:".to_string()))
+            Err(CoordinateError("com.h2database:h2:"))
         );
         assert_eq!(
             Dependency::try_from("com.h2database:h2: "),
-            Err(CoordinateError("com.h2database:h2: ".to_string()))
+            Err(CoordinateError("com.h2database:h2: "))
         )
     }
 
@@ -162,8 +163,8 @@ mod tests {
         assert_eq!(
             Dependency::try_from("com.h2database:h2:broken"),
             Err(VersionError(
-                "com.h2database".to_string(),
-                "h2".to_string(),
+                "com.h2database",
+                "h2",
                 UnparseableVersionError::from("broken"),
             ))
         )

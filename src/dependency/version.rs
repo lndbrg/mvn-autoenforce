@@ -3,8 +3,8 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::ops::Deref;
 
-use version_compare::version::Version as InnerVersion;
-use version_compare::version_part::VersionPart;
+use version_compare::Part as VersionPart;
+use version_compare::Version as InnerVersion;
 
 use crate::dependency::errors::UnparseableVersionError;
 
@@ -18,13 +18,18 @@ defined regexes as guards. These guards should make sure we never even call try_
 output from maven that matches a coordinate string. If someone for some reason has managed to create
 an alphabetical version and gotten it uploaded somewhere we will fail to parse it.
 */
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq)]
 pub struct Version<'a> {
     inner: InnerVersion<'a>,
 }
 
 impl<'a> Eq for Version<'a> {}
 
+impl<'a> PartialOrd for Version<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
 impl<'a> Ord for Version<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.inner.partial_cmp(&other.inner).unwrap()
@@ -40,7 +45,7 @@ impl<'a> Deref for Version<'a> {
 }
 
 impl<'a> TryFrom<&'a str> for Version<'a> {
-    type Error = UnparseableVersionError;
+    type Error = UnparseableVersionError<'a>;
 
     fn try_from(version_string: &'a str) -> Result<Self, Self::Error> {
         let initial_version = InnerVersion::from(version_string)

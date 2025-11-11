@@ -15,7 +15,7 @@ use crate::iter::SortedByExt;
 mod dependency;
 mod iter;
 
-fn parse<'a>(input: &'a str) -> Result<Vec<Dependency<'a>>, DependencyParseError<'a>> {
+fn parse(input: &str) -> Result<Vec<Dependency<'_>>, DependencyParseError<'_>> {
     let upper_bounds =
         Regex::new("Require upper bound dependencies error for (\\S+) paths to dependency are:")
             .unwrap();

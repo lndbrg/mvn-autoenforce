@@ -1,10 +1,8 @@
 use core::cmp::{Eq, Ord, Ordering};
 use core::fmt::{Display, Error, Formatter};
 use core::result::Result;
-use std::convert::TryFrom;
-use std::iter;
-
 use regex::{Match, Regex, escape};
+use std::convert::TryFrom;
 
 use crate::DependencyParseError;
 use crate::DependencyParseError::{CoordinateError, VersionError};
@@ -45,12 +43,12 @@ impl<'a> TryFrom<&'a str> for Dependency<'a> {
         match coordinates[..] {
             [group_id, artifact_id, version_string] if !version_string.trim().is_empty() => {
                 Version::try_from(version_string)
+                    .map_err(|e| VersionError(group_id, artifact_id, e))
                     .map(|version| Self {
                         group_id,
                         artifact_id,
                         version,
                     })
-                    .map_err(|e| VersionError(group_id, artifact_id, e))
             }
             _ => Err(CoordinateError(coordinate_string)),
         }
@@ -88,7 +86,7 @@ pub fn max_by_dep<'a>(
     )
     .unwrap();
 
-    let versions: Result<Vec<_>, _> = version_regex
+    let version_result: Result<Vec<_>, _> = version_regex
         .captures_iter(input)
         /*
         Translate all captures found, but skip the first as that is the full match of the
@@ -99,22 +97,18 @@ pub fn max_by_dep<'a>(
         .map(Version::try_from)
         .collect();
 
-    match versions {
-        Err(e) => Err(VersionError(dependency.group_id, dependency.artifact_id, e)),
-        /*
-        Chain original version on to the potentially matched version, that way we know that
-        the iterator is not the empty iterator, hence we can safely call unwrap on it since max_by
-        is guaranteed to return at least one result.
-        */
-        Ok(v) => Ok(iter::once(dependency.version)
-            .chain(v)
-            .max_by(Ord::cmp)
-            .map(|version| Dependency {
-                version,
-                ..dependency
-            })
-            .unwrap()),
-    }
+    version_result
+        .map_err(|e| VersionError(dependency.group_id, dependency.artifact_id, e))
+        .map(|versions| {
+            versions
+                .into_iter()
+                .max_by(Ord::cmp)
+                .map(|version| Dependency {
+                    version,
+                    ..dependency
+                })
+                .unwrap_or(dependency)
+        })
 }
 
 #[cfg(test)]
